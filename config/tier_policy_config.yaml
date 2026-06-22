@@ -1,0 +1,34 @@
+tiers:
+  Baseline:
+    weekly_credit_cap: 100
+  Advanced:
+    weekly_credit_cap: 400
+  Super:
+    weekly_credit_cap: 750
+  Highest:
+    weekly_credit_cap: 1000
+
+group_to_tier:
+  Advanced Credit Users: Advanced
+  High Credit Consumption Users: Super
+  One K Credit Users: Highest
+
+special_groups:
+  Emergency Credit Users: emergency_override
+
+recommendations:
+  enabled: true
+
+  move_up:
+    enabled: true
+    minimum_weeks_observed: 3
+    minimum_share_over_90_pct: 0.50
+
+  move_down:
+    enabled: true
+    minimum_weeks_observed: 4
+    maximum_average_utilization: 0.25
+
+  spike_monitor:
+    enabled: true
+    utilization_threshold: 0.90

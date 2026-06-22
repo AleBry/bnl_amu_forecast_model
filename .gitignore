@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+.venv/
+.env
+
+data/historical/
+data/weekly_uploads/
+data/processed/
+
+outputs/
+*.xlsx
+*.xls
+*.csv
+
+.DS_Store
+Thumbs.db

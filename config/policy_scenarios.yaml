@@ -1,0 +1,185 @@
+assumptions:
+
+  cap_change_sensitivity: 0.50
+
+  risk_model:
+    method: balance_scaling
+
+  stranding_probability:
+    method: surplus_ratio
+
+  risk_thresholds:
+
+    high_exhaustion_probability: 0.50
+    moderate_exhaustion_probability: 0.20
+
+    high_stranding_probability: 0.50
+    moderate_stranding_probability: 0.20
+
+  balance_status:
+
+    deficit_threshold: 0
+
+    near_target_lower_bound: -50000
+    near_target_upper_bound: 50000
+
+  cost_basis:
+    use_next_contract_price: true
+
+comparison:
+
+  sort_order:
+    - estimated_exhaustion_probability
+    - estimated_stranding_probability
+    - absolute_balance_distance
+
+scenarios:
+
+  #
+  # BASELINE
+  #
+
+  - name: Current Policy
+    purchased_credits: 1000000
+
+  #
+  # CONTRACT SIZE SCENARIOS
+  #
+
+  - name: Increase Contract 10 Percent
+    purchased_credits: 1100000
+
+  - name: Increase Contract 15 Percent
+    purchased_credits: 1150000
+
+  - name: Increase Contract 20 Percent
+    purchased_credits: 1200000
+
+  - name: Increase Contract 25 Percent
+    purchased_credits: 1250000
+
+  - name: Increase Contract 30 Percent
+    purchased_credits: 1300000
+
+  #
+  # DYNAMIC CONTRACT SIZING
+  #
+
+  - name: Contract Sized To Forecast Gap
+
+    dynamic_contract_size:
+      method: forecast_gap
+      buffer_percent: 0
+
+  - name: Contract Sized To Forecast Gap Plus 5 Percent Buffer
+
+    dynamic_contract_size:
+      method: forecast_gap
+      buffer_percent: 5
+
+  - name: Contract Sized To Forecast Gap Plus 10 Percent Buffer
+
+    dynamic_contract_size:
+      method: forecast_gap
+      buffer_percent: 10
+
+  #
+  # CAP REDUCTION SCENARIOS
+  #
+
+  - name: Reduce Advanced Cap 25 Percent
+
+    tier_cap_multipliers:
+      Advanced: 0.75
+
+  - name: Reduce Super Cap 25 Percent
+
+    tier_cap_multipliers:
+      Super: 0.75
+
+  - name: Reduce All Caps 10 Percent
+
+    tier_cap_multipliers:
+      Baseline: 0.90
+      Advanced: 0.90
+      Super: 0.90
+      Highest: 0.90
+
+  - name: Reduce All Caps 15 Percent
+
+    tier_cap_multipliers:
+      Baseline: 0.85
+      Advanced: 0.85
+      Super: 0.85
+      Highest: 0.85
+
+  #
+  # CAP INCREASE SCENARIOS
+  #
+
+  - name: Increase Advanced Cap 25 Percent
+
+    tier_cap_multipliers:
+      Advanced: 1.25
+
+  - name: Increase Highest Cap 25 Percent
+
+    tier_cap_multipliers:
+      Highest: 1.25
+
+  #
+  # EXPLICIT CAP OVERRIDE SCENARIOS
+  #
+
+  - name: Advanced Cap 500
+
+    tier_cap_overrides:
+      Advanced: 500
+
+  - name: Advanced Cap 600
+
+    tier_cap_overrides:
+      Advanced: 600
+
+  - name: Super Cap 1000
+
+    tier_cap_overrides:
+      Super: 1000
+
+  - name: Highest Cap 1500
+
+    tier_cap_overrides:
+      Highest: 1500
+
+  #
+  # COMBINED GOVERNANCE SCENARIOS
+  #
+
+  - name: Larger Contract Plus Reduced Caps
+
+    purchased_credits: 1200000
+
+    tier_cap_multipliers:
+      Advanced: 0.90
+      Super: 0.90
+      Highest: 0.90
+
+  - name: Balanced Governance
+
+    purchased_credits: 1200000
+
+    tier_cap_multipliers:
+      Advanced: 0.95
+      Super: 0.90
+      Highest: 0.90
+
+  - name: Balanced Governance Plus Higher Advanced Cap
+
+    purchased_credits: 1200000
+
+    tier_cap_overrides:
+      Advanced: 500
+
+    tier_cap_multipliers:
+      Super: 0.90
+      Highest: 0.90

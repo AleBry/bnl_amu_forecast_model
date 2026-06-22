@@ -1,0 +1,45 @@
+contract:
+  contract_start_date: "2026-04-01"
+  contract_end_date: "2026-09-30"
+  purchased_credits: 1000000
+  rollover_allowed: false
+
+pricing:
+  current_price_per_credit: 0.07
+  next_contract_price_per_credit: 0.04
+
+forecast:
+  mode: "auto"
+  normalize_weights: true
+  recent_average_window_weeks: 4
+  minimum_weeks_for_recent_average: 4
+
+  auto_weight_schedule:
+    - min_operational_weeks: 0
+      max_operational_weeks: 2
+      historical_weight: 0.70
+      recent_average_weight:
+      latest_week_weight: 0.30
+
+    - min_operational_weeks: 3
+      max_operational_weeks: 4
+      historical_weight: 0.50
+      recent_average_weight: 0.30
+      latest_week_weight: 0.20
+
+    - min_operational_weeks: 5
+      max_operational_weeks: 8
+      historical_weight: 0.30
+      recent_average_weight: 0.50
+      latest_week_weight: 0.20
+
+    - min_operational_weeks: 9
+      max_operational_weeks:
+      historical_weight: 0.20
+      recent_average_weight: 0.60
+      latest_week_weight: 0.20
+
+monte_carlo:
+  runs: 10000
+  random_seed: 42
+  stranding_threshold_credits: 50000
