@@ -1,0 +1,156 @@
+# Policy Recommendation Engine settings for the BNL AMU credit project.
+# This file holds engine tuning values only. Business policy inputs such as tier
+# caps and scenario definitions stay in the existing project YAML files.
+
+paths:
+  # Preferred I/O locations. The engine will still fall back to data/processed/
+  # for reads so the existing pipeline remains compatible.
+  input_roots:
+    - outputs
+    - data/processed
+  output_root: outputs
+
+user_scoring:
+  # Weights used to score user-level signals before converting to an action.
+  weights:
+    move_up_pressure: 2.0
+    historical_heavy_user: 1.0
+    move_down_pressure: 2.0
+    historical_light_user: 1.0
+    review_emergency_override: 2.0
+    review_limited_history: 1.0
+    review_recent_spike: 1.0
+  score_maximum: 4.0
+
+user_action_thresholds:
+  move_up:
+    minimum_weeks_observed: 1
+    minimum_share_over_90_pct: 0.25
+  move_down:
+    minimum_weeks_observed: 1
+    maximum_average_utilization: 0.75
+  review:
+    spike_utilization_threshold: 1.50
+
+tier_scoring:
+  weights:
+    too_low_pressure: 2.0
+    too_high_pressure: 2.0
+  score_maximum: 2.0
+
+tier_cap_thresholds:
+  # Thresholds are expressed as simple pressure cutoffs rather than business policy.
+  overutilization_share_for_raise: 0.25
+  average_utilization_for_lowering: 0.75
+
+tier_transition_rules:
+  # Explicit tier order and boundary behavior for user-level tier transitions.
+  tier_order:
+    - Baseline
+    - Advanced
+    - Super
+    - Highest
+  boundary_fallback_action: REVIEW
+  review_tier_behavior: preserve_current
+  boundary_reason_codes:
+    no_higher_tier: TIER_BOUNDARY_HIGH
+    no_lower_tier: TIER_BOUNDARY_LOW
+
+contract_scoring:
+  # Used to frame the contract-level recommendation from forecast and scenario data.
+  preferred_scenario_name: Current Policy
+  current_policy_priority_name: Current Policy
+  use_best_scenario_sort: true
+
+contract_risk_thresholds:
+  high_exhaustion_probability: 0.50
+  moderate_exhaustion_probability: 0.20
+  high_stranding_probability: 0.50
+  moderate_stranding_probability: 0.20
+
+confidence_rules:
+  # Convert a raw score into a qualitative confidence label.
+  high_min_ratio: 0.70
+  medium_min_ratio: 0.40
+  low_label: LOW
+  medium_label: MEDIUM
+  high_label: HIGH
+
+reason_codes:
+  PRESSURE_HIGH: Recent cap pressure is consistently above the configured move-up threshold.
+  PRESSURE_LOW: Observed utilization is below the configured move-down threshold.
+  PRESSURE_SPIKE: A recent high-utilization spike was observed without enough history for automatic movement.
+  EMERGENCY_OVERRIDE: The user appears in an emergency override group and should be manually reviewed.
+  HISTORY_LIMITED: The available observation window is shorter than the configured minimum review horizon.
+  HISTORICAL_HEAVY_USER: Historical segmentation suggests sustained high usage relative to current tiering.
+  HISTORICAL_LIGHT_USER: Historical segmentation suggests usage is modest relative to current tiering.
+  TIER_PRESSURE_HIGH: Tier-level pressure indicates the current cap may be constraining demand.
+  TIER_PRESSURE_LOW: Tier-level pressure indicates the current cap may be larger than needed.
+  TIER_BOUNDARY_HIGH: The user is already at the highest tier, so a move up is not available.
+  TIER_BOUNDARY_LOW: The user is already at the lowest tier, so a move down is not available.
+  FORECAST_EXHAUSTION: Forecasted contract-end balance is negative under current assumptions.
+  MC_EXHAUSTION_HIGH: Monte Carlo analysis shows elevated exhaustion probability.
+  MC_STRANDING_HIGH: Monte Carlo analysis shows elevated stranding probability.
+  SCENARIO_BETTER_OPTION: Scenario analysis identified a lower-risk contract option.
+  SCENARIO_CURRENT_POLICY: Current policy remains the best available scenario under configured sorting.
+  CAP_ALIGNED: Current cap appears broadly aligned with observed pressure.
+
+output_columns:
+  user:
+    - user_id
+    - current_tier
+    - recommended_action
+    - recommended_tier
+    - tier_change_direction
+    - tier_change_reason
+    - confidence
+    - reason_codes
+    - reason_summary
+    - estimated_credit_impact
+    - net_credit_impact
+  tier:
+    - tier
+    - current_cap
+    - suggested_cap
+    - cap_direction
+    - confidence
+    - reason_codes
+    - reason_summary
+  contract:
+    - current_contract_size
+    - recommended_contract_size
+    - recommended_delta
+    - exhaustion_probability
+    - stranding_probability
+    - expected_end_balance
+    - reason_summary
+  summary:
+    - run_timestamp
+    - num_users_reviewed
+    - num_user_moves_up
+    - num_user_moves_down
+    - num_users_retain
+    - num_users_review
+    - num_tiers_adjusted
+    - contract_recommendation
+    - net_credit_impact
+    - primary_risks
+    - notes
+  credit_impact_summary:
+    - current_total_estimated_credit_impact
+    - recommended_total_estimated_credit_impact
+    - net_credit_impact
+    - num_users_recommended_up
+    - num_users_recommended_down
+    - num_users_reviewed
+    - notes
+
+defaults:
+  missing_reason_summary: No material recommendation signals were triggered.
+  warning_prefix: "Warning:"
+  summary_complete_note: All recommendation sections were generated.
+  essential_inputs:
+    - cap_pressure_history_user_summary
+    - forecast_summary
+    - monte_carlo_summary
+    - policy_scenario_summary
